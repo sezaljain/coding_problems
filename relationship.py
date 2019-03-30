@@ -230,17 +230,18 @@ class SpouseRelationship(object):
 
 
 def request_tree(request_type,data):
+	a = AddRelationship()
 	if request_type=='ADD_SPOUSE':
-		# First entry is husband and second is wife
-		success,msg = SpouseRelationship.get_or_create_via_name(data[0],data[1])
+		# First entry is wife and second is husband
+		success,msg = a.add_spouse(data[0],data[1])
 	elif request_type=='ADD_CHILD':
 		# Mother should already be in table
 		# First entry is mother name, then child name and gender
-		success,msg = ChildParentRelationship.add_child_for_mother(data[1],data[2],data[0])
-	elif request_type=='GET_RELATIONSHIP':
-		# First entry is name, second entry is relationship name
-		success,msg = Person.get_relationship(data[0],data[1])
-		pass
+		success,msg = a.add_child(data[1],data[2],data[0])
+	# elif request_type=='GET_RELATIONSHIP':
+	# 	# First entry is name, second entry is relationship name
+	# 	success,msg = Person.get_relationship(data[0],data[1])
+	# 	pass
 	# print request_type,data,
 	print msg
 
@@ -269,7 +270,7 @@ def main():
 if __name__ == '__main__':
 	main()
 
-import csv,uuid
+import csv,uuid,re
 # from dataclasses import dataclass,astuple
 
 def read_csv(filepath):
@@ -283,8 +284,12 @@ def read_csv(filepath):
 	return data
 
 def calc_uid():
-	return uuid.uuid4().hex[:6]
-
+	uid = uuid.uuid4().hex[:6]
+	conflict = filter(lambda x:x[0]==uid,person_list)
+	if conflict:
+		uid = calc_uid()
+	return uid
+	
 
 custom_relationship_options=[
 ["Paternal-Uncle", "father.brother"],
@@ -302,17 +307,29 @@ base_relationships=["husband","daughter","son"]
 class AddRelationship:
 	"""
 	Adding new relationships in the tree. The ones permitted are spouse relationships and mother to child relationships
+	ADD_CHILD <mother_name> <child_name> <child_gender>
+	ADD_SPOUSE <wife_name> <husband_name>
 	"""
-	def __init__():
-		pass
-	def self.validate_add_person(self,person_name,person_gender):
+	# def __init__():
+	# 	pass
+	def get_person(self,person_name):
+		matching_people = filter(lambda x:x[1]==person_name,person_list)
+		assert len(matching_people)<=1,"Should not be more than one person with the same name"
+		# print ma
+		if matching_people:
+			return matching_people[0]
+			# assert(person[2]==person_gender,"Person exists with another gender")
+		return None
+
+	def validate_add_person(self,person_name,person_gender):
 		# Rule 1:Person should have a name not already in tree
 		return True, "go ahead"
 
 	def add_person(self,person_name,person_gender):
 		# success,msg = self.validate_add_person()
-		person_list.append([person_name,person_gender])
-		pass
+		p = [calc_uid(),person_name,person_gender]
+		person_list.append(p)
+		return p
 
 	def validate_add_child(self,mother_name,child_name,child_gender):
 		# Rule 1: Mother should already exist in the tree
@@ -331,11 +348,12 @@ class AddRelationship:
 		success,msg = self.validate_add_child(mother_name,child_name,child_gender)
 		if success:
 			mother = self.get_person(mother_name)
-			child = self.get_person(child_name,child_gender)
+			child = self.get_person(child_name)
 			if not child:
 				child = self.add_person(child_name,child_gender)
 			rel = "daughter" if child_gender=="Female" else "son"
-			relationship_list.append(rel,mother[0],child[0])
+			print mother,child
+			relationship_list.append([rel,mother[0],child[0]])
 		return success,msg
 
 	def add_spouse(self,wife_name,husband_name):
@@ -347,7 +365,7 @@ class AddRelationship:
 			husband = self.get_person(husband_name)
 			if not husband:
 				husband = self.add_person(husband_name,"Male")
-			relationship_list.append("husband",wife[0],husband[0])
+			relationship_list.append(["husband",wife[0],husband[0]])
 		return success,msg
 
 
@@ -363,8 +381,8 @@ class GetRelationship:
 
 	"""
 
-	def __init__(self,initial_person_list):
-		self.relationship_of = initial_person_list
+	def __init__(self,*args,**kwargs):
+		# self.relationship_of = initial_person_list
 
 		self.relation_to_function ={
 		##This is a list of ORDER 1 relationships based on which higher order custom relationships can be formed
@@ -449,8 +467,8 @@ class GetRelationship:
 		#Step1: lookup relationship in relationship_options
 		filter(lambda x:x[0]==custom_relationship,custom_relationship_options)
 
-	def get_custom_relationship(self,custom_relationship):
-		input_people = self.relationship_of
+	def get_custom_relationship(self,input_people,custom_relationship):
+		custom_relationship = re.sub(r"[^a-zA-Z.+]", '', custom_relationship)
 		for custom_relationship_part in custom_relationship.split('+'):
 			for order1_rel in custom_relationship_part.split('.'):
 				output_people = self.relation_to_function[order1_rel](input_people)
