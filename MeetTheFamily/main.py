@@ -1,7 +1,7 @@
 import csv,sys
 from get_relationship import GetRelationship
 from add_relationship import AddRelationship
-from global_var import *
+import globals
 
 
 def read_csv(filepath):
@@ -16,9 +16,9 @@ def read_csv(filepath):
 
 
 def request_tree(request_type,data):
-	print person_list
-	a = AddRelationship(person_list,relationship_list)
-	g = GetRelationship(person_list,relationship_list,order3_relationship_definition)
+	# print person_list
+	a = AddRelationship()#globals.person_list,globals.relationship_list)
+	g = GetRelationship()#globals.person_list,globals.relationship_list,globals.order3_relationship_definition)
 	output={'msg':''}
 	if request_type=='ADD_SPOUSE':
 		output = a.add_spouse(data[0],data[1])
@@ -31,17 +31,18 @@ def request_tree(request_type,data):
 
 
 def main():
-	initialize_global()
+	globals.initialize()
 	print ("Welcome to Shan family")
 	input_file = sys.argv[1]
-	person_list = []
-	relationship_list = []
-	order3_relationship_definition = {}
+	# person_list = []
+	# relationship_list = []
+	# order3_relationship_definition = {}
+	# print person_list
 
 	fp = open('order3_relationships.txt')
 	reader = csv.DictReader(filter(lambda row: row[0]!='#', fp))
 	for row in reader:
-		order3_relationship_definition[row['Name']]=row['Definition'].strip()
+		globals.order3_relationship_definition[row['Name']]=row['Definition'].strip()
 	fp = open('initial.txt')
 	reader = csv.DictReader(filter(lambda row: row[0]!='#', fp),delimiter=" ")
 	for row in reader:

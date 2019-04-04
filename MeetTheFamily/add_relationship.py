@@ -1,9 +1,9 @@
 import uuid
-from global_var import *
+import globals
 
 def calc_uid():
 	uid = uuid.uuid4().hex[:6]
-	conflict = filter(lambda x:x[0]==uid,person_list)
+	conflict = filter(lambda x:x[0]==uid,globals.person_list)
 	if conflict:
 		uid = calc_uid()
 	return uid
@@ -20,7 +20,7 @@ class AddRelationship:
 		return "AddRelationship:add_spouse/add_child"
 
 	def get_person(self,person_name):
-		matching_people = filter(lambda x:x[1]==person_name,person_list)
+		matching_people = filter(lambda x:x[1]==person_name,globals.person_list)
 		assert len(matching_people)<=1,"Should not be more than one person with the same name"
 		if matching_people:
 			return matching_people[0]
@@ -33,7 +33,7 @@ class AddRelationship:
 
 	def add_person(self,person_name,person_gender):
 		p = [calc_uid(),person_name,person_gender]
-		person_list.append(p)
+		globals.person_list.append(p)
 		return p
 
 	def validate_add_child(self,mother_name,child_name,child_gender):
@@ -74,7 +74,7 @@ class AddRelationship:
 				data['msg'] = "WIFE_NOT_FEMALE"
 				return data
 			#Rule 3
-			conflict = filter(lambda x:x[0]=="husband" and (x[1]==wife[0]),relationship_list)
+			conflict = filter(lambda x:x[0]=="husband" and (x[1]==wife[0]),globals.relationship_list)
 			if conflict:
 				data['msg'] = "WIFE_MARRIED_TO_OTHER"
 				return data
@@ -84,7 +84,7 @@ class AddRelationship:
 				data['msg'] = "HUSBAND_NOT_MALE"
 				return data
 			#Rule 3
-			conflict = filter(lambda x:x[0]=="husband" and (x[2]==husband[0]),relationship_list)
+			conflict = filter(lambda x:x[0]=="husband" and (x[2]==husband[0]),globals.relationship_list)
 			if conflict:
 				data['msg'] = "HUSBAND_MARRIED_TO_OTHER"
 				return data
@@ -102,7 +102,7 @@ class AddRelationship:
 			if not child:
 				child = self.add_person(child_name,child_gender)
 			rel = "daughter" if child_gender=="Female" else "son"
-			relationship_list.append([rel,mother[0],child[0]])
+			globals.relationship_list.append([rel,mother[0],child[0]])
 			data['msg'] = "CHILD_ADDITION_SUCCEEDED"
 		return data
 
@@ -115,6 +115,6 @@ class AddRelationship:
 			husband = data.get('husband',None)
 			if not husband:
 				husband = self.add_person(husband_name,"Male")
-			relationship_list.append(["husband",wife[0],husband[0]])
+			globals.relationship_list.append(["husband",wife[0],husband[0]])
 			data['msg'] = "SPOUSE_ADDED_SUCCESSFULLY"
 		return data

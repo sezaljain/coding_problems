@@ -1,5 +1,6 @@
 import re
 from add_relationship import AddRelationship
+import globals
 
 
 
@@ -46,10 +47,10 @@ class GetRelationship:
 		else:
 			relation_of_id,relation_id = 2,1
 		output_person_list = map(
-			lambda x:filter(lambda y:y[0]==x[relation_id],person_list)[0],  #extracting person from relationship
+			lambda x:filter(lambda y:y[0]==x[relation_id],globals.person_list)[0],  #extracting person from relationship
 			filter(#extracting the desired relationship for people in relationship_of
 					lambda x:x[0]==relationship_type and x[relation_of_id] in [y[0] for y in input_people],
-					relationship_list
+					globals.relationship_list
 					)
 		)
 		return output_person_list
@@ -104,7 +105,7 @@ class GetRelationship:
 		#Step1: lookup relationship in relationship_options
 		data={'success':False}
 
-		rel = order3_relationship_definition.get(custom_relationship,None)
+		rel = globals.order3_relationship_definition.get(custom_relationship,None)
 		if not rel:
 			data['msg'] = "RELATIONSHIP_NOT_FOUND"
 			return data
