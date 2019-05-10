@@ -21,3 +21,5 @@ Brother-In-Law, wife.brother+husband.brother+sister.husband
 Daughter-In-Law, son.wife
 Son-In-Law,daughter.husband
 Mother-In-Law, wife.mother+husband.mother
+Nephew, sister.son+brother.son
+Niece, sister.daughter+sister.son

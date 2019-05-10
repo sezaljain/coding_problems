@@ -11,4 +11,8 @@ ADD_SPOUSE <wife_name> <husband_name>
 GET_RELATIONSHIP <person_name> <order3_relationship_name>
 
 Please run the program using the command:
-python relationship.py input.txt
+python main.py input.txt
+
+
+Testing:
+pytest test_family_tree.py

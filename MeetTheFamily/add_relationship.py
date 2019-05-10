@@ -29,6 +29,8 @@ class AddRelationship:
 
 	def validate_add_person(self,person_name,person_gender):
 		# Rule 1:Person should have a name not already in tree
+		if self.get_person(person_name):
+			return False, "Person with name already exists"
 		return True, "go ahead"
 
 	def add_person(self,person_name,person_gender):
@@ -45,6 +47,8 @@ class AddRelationship:
 		data = {'success':False}
 		mother = self.get_person(mother_name)
 		child = self.get_person(child_name)
+
+		print mother,child
 		if not mother:
 			data['msg'] = "PERSON_NOT_FOUND"
 			return data
@@ -96,6 +100,7 @@ class AddRelationship:
 
 	def add_child(self,mother_name,child_name,child_gender):
 		data = self.validate_add_child(mother_name,child_name,child_gender)
+		print "aa", data
 		if data['success']:
 			mother = data.get('mother',None)
 			child = data.get('child',None)
